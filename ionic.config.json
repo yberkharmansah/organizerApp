@@ -1,0 +1,7 @@
+{
+  "name": "planlama-asistani",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
