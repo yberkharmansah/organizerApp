@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <h1>Hedeflerim</h1>
+  <div class="goals-container">
+    <h1 class="goals-title">Hedeflerim</h1>
     
-    <div>
+    <div class="goal-inputs">
       <input v-model="goal.title" placeholder="Hedef Başlığı" />
       <textarea v-model="goal.description" placeholder="Açıklama"></textarea>
       <select v-model="goal.frequency">
@@ -10,17 +10,17 @@
         <option value="weekly">Haftalık</option>
         <option value="monthly">Aylık</option>
       </select>
-      <button @click="addGoal">Hedef Ekle</button>
+      <button class="add-goal-button" @click="addGoal">Hedef Ekle</button>
     </div>
 
-    <ul>
-      <li v-for="(goal, index) in goals" :key="index">
-        <h3>{{ goal.title }}</h3>
-        <p>{{ goal.description }}</p>
-        <p>Kalan Süre: {{ calculateRemainingTime(goal.createdAt, goal.frequency) }}</p>
-        <button @click="removeGoal(goal.id)">Sil</button>
-      </li>
-    </ul>
+    <div class="goals-grid">
+      <div v-for="(goal, index) in goals" :key="goal.id" class="goal-card">
+        <button class="delete-button" @click="removeGoal(goal.id)">&#10006;</button> <!-- Estetik "X" sembolü -->
+        <h3 class="goal-title">{{ goal.title }}</h3>
+        <p class="goal-description">{{ goal.description }}</p>
+        <p class="goal-deadline">Kalan Süre: {{ calculateRemainingTime(goal.createdAt, goal.frequency) }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -36,7 +36,7 @@ export default {
         description: '',
         frequency: 'daily',
       },
-      goals: [], // Burada hedefleri tutacağız
+      goals: [],
     };
   },
   methods: {
@@ -47,14 +47,13 @@ export default {
         description: this.goal.description,
         frequency: this.goal.frequency,
         createdAt: new Date().toISOString(),
-        id: newGoalRef.key, // Her hedefe bir ID veriyoruz
+        id: newGoalRef.key,
       })
       .then(() => {
-        console.log('Yeni hedef eklendi:', this.goal);
         this.goal.title = '';
         this.goal.description = '';
         this.goal.frequency = 'daily';
-        this.fetchGoals(); // Hedefleri tekrar yükle
+        this.fetchGoals();
       })
       .catch((error) => {
         console.error('Hedef eklenirken hata oluştu:', error);
@@ -65,8 +64,7 @@ export default {
       const goalRef = dbRef(db, 'goals/' + goalId);
       remove(goalRef)
       .then(() => {
-        console.log('Hedef silindi:', goalId);
-        this.fetchGoals(); // Hedefleri tekrar yükle
+        this.fetchGoals();
       })
       .catch((error) => {
         console.error('Hedef silinirken hata oluştu:', error);
@@ -74,7 +72,6 @@ export default {
     },
 
     fetchGoals() {
-      // Firebase'den hedefleri yükleme fonksiyonu
       const goalsRef = dbRef(db, 'goals');
       onValue(goalsRef, (snapshot) => {
         this.goals = [];
@@ -117,11 +114,132 @@ export default {
   },
 
   mounted() {
-    this.fetchGoals(); // Bileşen yüklendiğinde hedefleri al
+    this.fetchGoals();
   }
 };
 </script>
 
 <style scoped>
-/* Buraya stil ekleyebilirsiniz */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.goals-container {
+  padding: 2rem;
+  background-color: #f1f3f4;
+  min-height: 100vh; /* Sayfanın tam yüksekliğini kaplar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto; /* Dikey kaydırmayı etkinleştirir */
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  overflow-x: auto; /* Yatay kaydırmayı etkinleştirir */
+}
+
+/* Başlık */
+.goals-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Hedef girişi */
+.goal-inputs {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.goal-inputs input,
+.goal-inputs textarea,
+.goal-inputs select {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  width: 300px;
+}
+
+/* Hedef Ekle butonu */
+.add-goal-button {
+  background-color: #00bfff; /* Daha canlı mavi/turkuaz renk */
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-goal-button:hover {
+  background-color: #009acd; /* Hover sırasında daha koyu turkuaz */
+}
+
+/* Hedef kartları */
+.goal-card {
+  position: relative;
+  background-color: #40E0D0; /* Turkuaz renk */
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.goal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.goal-description {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+.goal-deadline {
+  font-size: 1rem;
+  font-weight: bold;
+  align-self: flex-end;
+}
+
+/* Silme butonu */
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  color: black; /* Daha şık siyah renk */
+  border: 2px solid black; /* Siyah çerçeve */
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: black;
+  color: white; /* Hover sırasında ters çevirme efekti */
+}
+.main-content {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
 </style>

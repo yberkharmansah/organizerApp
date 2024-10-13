@@ -26,4 +26,22 @@ nav a {
   text-decoration: none;
   color: #333;
 }
+
+/* Yeni CSS kuralları buraya eklenebilir */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  box-sizing: border-box;
+}
 </style>
